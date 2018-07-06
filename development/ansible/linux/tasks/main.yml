@@ -1,0 +1,9 @@
+- name: Install Pachages
+  yum: pkg={{item}} state=latest
+  with_items:
+    - git
+    - vim
+
+- name: set timezone to Asia/Tokyo
+  timezone:
+    name: Asia/Tokyo

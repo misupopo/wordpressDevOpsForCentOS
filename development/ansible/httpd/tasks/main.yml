@@ -1,0 +1,12 @@
+- name: Install apache
+  yum: pkg={{item}} state=latest
+  with_items:
+    - httpd
+
+- name: Copy wordpress.conf file
+  template: src=wordpress.conf dest=/etc/httpd/conf.d/wordpress.conf backup=yes
+
+- name: Chconfig on httpd
+  service: name=httpd state=started enabled=yes
+
+

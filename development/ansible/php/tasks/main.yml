@@ -1,0 +1,6 @@
+- name: Install PHP
+  yum: pkg={{item}} state=latest
+  with_items:
+    - php
+    - php-mysql
+    - php-mbstring

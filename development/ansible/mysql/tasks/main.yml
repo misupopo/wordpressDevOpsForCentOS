@@ -1,0 +1,38 @@
+- name: Install mysql
+  yum: name=http://dev.mysql.com/get/mysql-community-release-el7-5.noarch.rpm state=present
+
+- name: Install mysql-server
+  yum: pkg={{item}} state=latest
+  with_items:
+    - mysql-community-server
+    - mysql-server
+    - MySQL-python
+
+- name: Chconfig on mysqld
+  service: name=mysqld state=started enabled=yes
+
+- name: Initialize insecure mysql
+  command: mysqld --initialize-insecure --user=mysql
+  ignore_errors: yes
+
+- name: Change the mysql from insecure to secure
+  command: mysql -u root -e "CREATE DATABASE wordpress"
+  ignore_errors: yes
+
+- name: Create mysql user
+  mysql_user: name="wordpress" host="localhost" password="superTest1234##" state=present
+  ignore_errors: yes
+
+- name: Set mysql user privileges
+  mysql_user:
+    name="wordpress"
+    priv="wordpress.*:ALL"
+    state=present
+  ignore_errors: yes
+
+- name: Reload privilege tables
+  command: 'mysql -ne "{{ item }}"'
+  with_items:
+    - FLUSH PRIVILEGES
+  changed_when: False
+

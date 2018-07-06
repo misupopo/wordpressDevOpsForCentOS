@@ -1,0 +1,27 @@
+- name: Download wordpress
+  get_url: url="http://ja.wordpress.org/latest-ja.tar.gz"
+           dest=/tmp force=True
+
+- name: Unarchive wordpress folder
+  unarchive: remote_src=True src=/tmp/wordpress-4.9.6-ja.tar.gz dest=/tmp
+
+- name: Unmount
+  command: umount -f /wordpress
+  ignore_errors: yes
+
+- name: Move wordpress directory
+  command: mv /tmp/wordpress /
+  ignore_errors: yes
+
+- name: Change Ownership
+  file: dest=/wordpress owner=apache group=apache mode=0775
+
+# apacheをinstallしないと/var/wwwは存在しない
+- name: Create symbolic link
+  file:
+    src: /wordpress
+    dest: "/var/www/html/wordpress"
+    state: link
+
+- name: Copy wp-config.php file
+  template: src=wp-config.php dest=/wordpress/wp-config.php backup=yes
