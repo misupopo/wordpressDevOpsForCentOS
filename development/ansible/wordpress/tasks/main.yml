@@ -5,24 +5,9 @@
 - name: Unarchive wordpress folder
   unarchive: remote_src=True src=/tmp/wordpress-4.9.7-ja.tar.gz dest=/tmp
 
-#- name: Move wordpress directory
-#  command: mv /tmp/wordpress /
-#  ignore_errors: yes
-#
-
-#- name: Change Ownership
-#  file: dest=/wordpress owner=apache group=apache mode=0775
-
 - name: Set the owner of apache directory
   file: path=/tmp/wordpress owner=apache group=apache mode=0775 recurse=yes
   register: apacheResult
-
-#- name: Change Ownership
-#  file: path=/tmp/wordpress owner=root group=root mode=0775
-
-#- name: Copy wordpress directory
-#  copy: src=/home/vagrant/test/test.html dest=/home/vagrant/tes1
-#  register: copyWordpress
 
 # apacheをinstallしないと/var/wwwは存在しない
 - name: Create symbolic link for appach
@@ -31,9 +16,15 @@
     dest: "/var/www/html/wordpress"
     state: link
 
+- name: Change symbolic link owner for appach
+  shell: chown -R apache:apache /var/www/html/wordpress
+
 - name: Copy wp-config.php file
   template: src=wp-config.php dest=/wordpress/wp-config.php backup=yes
 
 - name: Copy wordpress folder
   shell: cp -r /tmp/wordpress/* /wordpress
   when: apacheResult
+
+- name: Set chcon
+  shell: chcon system_u:object_r:httpd_sys_content_t:s0 /wordpress -R
