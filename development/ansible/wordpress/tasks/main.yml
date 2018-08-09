@@ -1,9 +1,13 @@
+- name: Include var faile
+  include_vars:
+    file: wordpress.yml
+
 - name: Download wordpress
   get_url: url="http://ja.wordpress.org/latest-ja.tar.gz"
            dest=/tmp force=True
 
 - name: Unarchive wordpress folder
-  unarchive: remote_src=True src=/tmp/wordpress-4.9.7-ja.tar.gz dest=/tmp
+  unarchive: remote_src=True src=/tmp/wordpress-{{version}}-ja.tar.gz dest=/tmp
 
 - name: Set the owner of apache directory
   file: path=/tmp/wordpress owner=apache group=apache mode=0775 recurse=yes
@@ -12,19 +16,19 @@
 # apacheをinstallしないと/var/wwwは存在しない
 - name: Create symbolic link for appach
   file:
-    src: /wordpress
-    dest: "/var/www/html/wordpress"
+    src: /{{name}}
+    dest: "/var/www/html/{{name}}"
     state: link
 
 - name: Change symbolic link owner for appach
-  shell: chown -R apache:apache /var/www/html/wordpress
+  shell: chown -R apache:apache /var/www/html/{{name}}
 
 - name: Copy wp-config.php file
-  template: src=wp-config.php dest=/wordpress/wp-config.php backup=yes
+  template: src=wp-config.php dest=/{{name}}/wp-config.php backup=yes
 
 - name: Copy wordpress folder
-  shell: cp -r /tmp/wordpress/* /wordpress
+  shell: cp -r /tmp/wordpress/* /{{name}}
   when: apacheResult
 
 - name: Set chcon
-  shell: chcon system_u:object_r:httpd_sys_content_t:s0 /wordpress -R
+  shell: chcon system_u:object_r:httpd_sys_content_t:s0 /{{name}} -R
